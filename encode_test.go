@@ -122,7 +122,7 @@ func TestMarshal(t *testing.T) {
 	t.Run("with tag case:normal", func(t *testing.T) {
 
 		type QueryParams struct {
-			IsTrue bool `query:"case:normal"`
+			IsTrue bool `query:"name:type"`
 		}
 
 		expect := "IsTrue=true"
@@ -146,6 +146,29 @@ func TestMarshal(t *testing.T) {
 		page := 1
 		actual, err := query.Marshal(QueryParams{
 			Page: &page,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		Equal(t, expect, actual)
+	})
+
+	t.Run("with mix", func(t *testing.T) {
+
+		type QueryParams struct {
+			text   string `query:"text"`
+			ID     string
+			Number int64
+			vat    float64
+		}
+
+		expect := "text=TEXT&id=1234567&number=0&vat=1.1"
+		actual, err := query.Marshal(QueryParams{
+			text:   "TEXT",
+			ID:     "1234567",
+			Number: 0,
+			vat:    1.1,
 		})
 		if err != nil {
 			t.Fatal(err)
