@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	TAG       = "query"
-	SEPERATOR = "&"
-	EQUAL     = "="
+	tag               = "query"
+	seperator         = "&"
+	equal             = "="
+	tagNameFollowType = "name:type"
 )
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
@@ -61,7 +62,7 @@ func (e *encode) do() (query string, err error) {
 	for i := 0; i < e.obj.NumField(); i++ {
 		e.pair(e.obj.Type().Field(i), e.obj.Field(i))
 		if i != e.obj.NumField()-1 {
-			e.qb.WriteString(SEPERATOR)
+			e.qb.WriteString(seperator)
 		}
 	}
 
@@ -73,15 +74,15 @@ func (e *encode) pair(fs reflect.StructField, v reflect.Value) {
 	bb := bytes.Buffer{}
 	key := e.key(fs)
 	bb.WriteString(key)
-	bb.WriteString(EQUAL)
+	bb.WriteString(equal)
 	bb.WriteString(e.valueToString(v))
 	e.qb.Write(bb.Bytes())
 }
 
 func (e *encode) key(v reflect.StructField) string {
-	name := v.Tag.Get(TAG)
+	name := v.Tag.Get(tag)
 
-	if name == "case:normal" {
+	if name == tagNameFollowType {
 		return v.Name
 	}
 
