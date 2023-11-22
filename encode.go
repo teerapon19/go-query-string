@@ -4,20 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
-	"strings"
 )
-
-const (
-	tag               = "query"
-	seperator         = "&"
-	equal             = "="
-	tagNameFollowType = "name:type"
-)
-
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
 func Marshal(v any) (string, error) {
 	e := newEncoder(v)
@@ -86,18 +74,12 @@ func (e *encode) key(v reflect.StructField) string {
 		return v.Name
 	}
 
-	return e.convertToSnakeCase(v.Name)
-}
-
-func (e *encode) convertToSnakeCase(name string) string {
-	snake := matchFirstCap.ReplaceAllString(name, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
+	return ConvertToSnakeCase(v.Name)
 }
 
 func (e *encode) valueToString(v reflect.Value) (s string) {
 
-	// deref pointer
+	// reflect pointer
 	if v.Kind() == reflect.Pointer {
 		s = e.valueToString(v.Elem())
 		return
@@ -110,10 +92,10 @@ func (e *encode) valueToString(v reflect.Value) (s string) {
 		s = strconv.FormatBool(v.Bool())
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		s = strconv.FormatInt(v.Int(), 10)
-	case reflect.Float32:
-		s = strconv.FormatFloat(v.Float(), 'f', -1, 32)
-	case reflect.Float64:
-		s = strconv.FormatFloat(v.Float(), 'f', -1, 64)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		s = strconv.FormatUint(v.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		s = strconv.FormatFloat(v.Float(), 'f', -1, v.Type().Bits())
 	default:
 		e.error(fmt.Errorf("type does not support"))
 	}
