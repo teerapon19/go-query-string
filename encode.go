@@ -74,7 +74,7 @@ func (e *encode) key(v reflect.StructField) string {
 		return v.Name
 	}
 
-	return ConvertToSnakeCase(v.Name)
+	return convertToSnakeCase(v.Name)
 }
 
 func (e *encode) valueToString(v reflect.Value) (s string) {

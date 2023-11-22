@@ -10,6 +10,12 @@ import (
 
 func TestUnmarshal(t *testing.T) {
 
+	equal := func(t *testing.T, expect interface{}, actual interface{}) {
+		if !reflect.DeepEqual(expect, actual) {
+			t.Fatalf("expect: %v, actual: %v", expect, actual)
+		}
+	}
+
 	t.Run("type pointer int", func(t *testing.T) {
 
 		type QueryParams struct {
@@ -24,7 +30,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 		query.Unmarshal("number=1", &actual)
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type pointer string", func(t *testing.T) {
@@ -41,7 +47,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 		query.Unmarshal("text=hello", &actual)
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type pointer string not found need nil", func(t *testing.T) {
@@ -57,7 +63,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 		query.Unmarshal("text2=hello", &actual)
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type string", func(t *testing.T) {
@@ -73,7 +79,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 		query.Unmarshal("text=hello", &actual)
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type bool", func(t *testing.T) {
@@ -89,7 +95,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 		query.Unmarshal("is_true=true", &actual)
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type int int8 int16 int32 int64 and multiple value", func(t *testing.T) {
@@ -116,7 +122,7 @@ func TestUnmarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("type float32 float64 and multiple value", func(t *testing.T) {
@@ -137,7 +143,7 @@ func TestUnmarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("without tag", func(t *testing.T) {
@@ -156,7 +162,7 @@ func TestUnmarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with tag case:normal", func(t *testing.T) {
@@ -175,7 +181,7 @@ func TestUnmarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with mix", func(t *testing.T) {
@@ -203,7 +209,7 @@ func TestUnmarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with unexported field return error", func(t *testing.T) {
@@ -218,8 +224,8 @@ func TestUnmarshal(t *testing.T) {
 
 		actualErr := query.Unmarshal("text=TEXT", &actual)
 
-		Equal(t, actual.text, "")
-		Equal(t, expectErr, actualErr)
+		equal(t, actual.text, "")
+		equal(t, expectErr, actualErr)
 	})
 
 }

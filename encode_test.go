@@ -10,6 +10,12 @@ import (
 
 func TestMarshal(t *testing.T) {
 
+	equal := func(t *testing.T, expect interface{}, actual interface{}) {
+		if !reflect.DeepEqual(expect, actual) {
+			t.Fatalf("expect: %v, actual: %v", expect, actual)
+		}
+	}
+
 	t.Run("error unsupport type", func(t *testing.T) {
 
 		type QueryParams struct {
@@ -21,7 +27,7 @@ func TestMarshal(t *testing.T) {
 		})
 
 		expectError := fmt.Errorf("type does not support")
-		Equal(t, expectError, err)
+		equal(t, expectError, err)
 	})
 
 	t.Run("with string", func(t *testing.T) {
@@ -38,7 +44,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with bool", func(t *testing.T) {
@@ -55,7 +61,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with int int8 int16 int32 int64 and multiple value", func(t *testing.T) {
@@ -80,7 +86,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with float32 float64 and multiple value", func(t *testing.T) {
@@ -99,7 +105,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("without tag", func(t *testing.T) {
@@ -116,7 +122,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with tag case:normal", func(t *testing.T) {
@@ -133,7 +139,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with pointer field", func(t *testing.T) {
@@ -151,7 +157,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
 	t.Run("with mix", func(t *testing.T) {
@@ -174,13 +180,7 @@ func TestMarshal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		Equal(t, expect, actual)
+		equal(t, expect, actual)
 	})
 
-}
-
-func Equal(t *testing.T, expect interface{}, actual interface{}) {
-	if !reflect.DeepEqual(expect, actual) {
-		t.Fatalf("expect: %v, actual: %v", expect, actual)
-	}
 }

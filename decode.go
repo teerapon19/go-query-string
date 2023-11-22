@@ -67,7 +67,7 @@ func (d *decode) getName(sf reflect.StructField) string {
 	if name == tagNameFollowType {
 		name = sf.Name
 	} else if name == "" {
-		name = ConvertToSnakeCase(sf.Name)
+		name = convertToSnakeCase(sf.Name)
 	}
 	return name
 }
