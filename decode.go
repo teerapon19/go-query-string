@@ -74,6 +74,10 @@ func (d *decode) getName(sf reflect.StructField) string {
 	return name
 }
 
+func (e *decode) ignoreField(v reflect.StructField) bool {
+	return v.Tag.Get(tag) == tagIgnore
+}
+
 func (d *decode) mapValueToObj(data map[string]string, v reflect.Value) {
 	elem := v.Elem()
 	elemType := elem.Type()
@@ -84,6 +88,10 @@ func (d *decode) mapValueToObj(data map[string]string, v reflect.Value) {
 
 		if !fieldValue.CanSet() {
 			d.error(fmt.Errorf("%v is unexported field", fieldType.Name))
+		}
+
+		if d.ignoreField(fieldType) {
+			continue
 		}
 
 		fieldName := d.getName(fieldType)

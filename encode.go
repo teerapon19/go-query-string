@@ -47,16 +47,25 @@ func (e *encode) do() (query string, err error) {
 		}
 	}()
 
-	numFields := e.obj.NumField()
-	for i := 0; i < numFields; i++ {
-		e.pair(e.obj.Type().Field(i), e.obj.Field(i))
-		if i != numFields-1 {
+	isFrist := true
+	for i := 0; i < e.obj.NumField(); i++ {
+		fieldType := e.obj.Type().Field(i)
+		if e.ignoreField(fieldType) {
+			continue
+		}
+		if !isFrist {
 			e.qb.WriteString(seperator)
 		}
+		e.pair(fieldType, e.obj.Field(i))
+		isFrist = false
 	}
 
 	query = e.qb.String()
 	return
+}
+
+func (e *encode) ignoreField(v reflect.StructField) bool {
+	return v.Tag.Get(tag) == tagIgnore
 }
 
 func (e *encode) pair(fs reflect.StructField, v reflect.Value) {

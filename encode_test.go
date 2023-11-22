@@ -160,6 +160,24 @@ func TestMarshal(t *testing.T) {
 		equal(t, expect, actual)
 	})
 
+	t.Run("with ignore field", func(t *testing.T) {
+
+		type QueryParams struct {
+			ID     string `query:"-"`
+			Number int64
+		}
+
+		expect := "number=0"
+		actual, err := query.Marshal(QueryParams{
+			Number: 0,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		equal(t, expect, actual)
+	})
+
 	t.Run("with mix", func(t *testing.T) {
 
 		type QueryParams struct {
@@ -170,6 +188,52 @@ func TestMarshal(t *testing.T) {
 		}
 
 		expect := "text=TEXT&id=1234567&number=0&vat=1.1"
+		actual, err := query.Marshal(QueryParams{
+			text:   "TEXT",
+			ID:     "1234567",
+			Number: 0,
+			vat:    1.1,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		equal(t, expect, actual)
+	})
+
+	t.Run("with mix and ignore field", func(t *testing.T) {
+
+		type QueryParams struct {
+			text   string `query:"text"`
+			ID     string `query:"-"`
+			Number int64
+			vat    float64 `query:"-"`
+		}
+
+		expect := "text=TEXT&number=0"
+		actual, err := query.Marshal(QueryParams{
+			text:   "TEXT",
+			ID:     "1234567",
+			Number: 0,
+			vat:    1.1,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		equal(t, expect, actual)
+	})
+
+	t.Run("with mix and ignore field 2", func(t *testing.T) {
+
+		type QueryParams struct {
+			text   string `query:"text"`
+			ID     string `query:"-"`
+			Number int64  `query:"-"`
+			vat    float64
+		}
+
+		expect := "text=TEXT&vat=1.1"
 		actual, err := query.Marshal(QueryParams{
 			text:   "TEXT",
 			ID:     "1234567",

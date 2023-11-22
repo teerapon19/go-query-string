@@ -9,6 +9,7 @@ const (
 	tag               = "query"
 	seperator         = "&"
 	equal             = "="
+	tagIgnore         = "-"
 	tagNameFollowType = "name:type"
 )
 

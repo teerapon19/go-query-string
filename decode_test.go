@@ -228,6 +228,54 @@ func TestUnmarshal(t *testing.T) {
 		equal(t, expectErr, actualErr)
 	})
 
+	t.Run("without ignore", func(t *testing.T) {
+
+		type QueryParams struct {
+			Ignore string `query:"-"`
+			IsTrue bool
+		}
+
+		var actual QueryParams
+
+		expect := QueryParams{
+			IsTrue: true,
+		}
+		err := query.Unmarshal("is_true=true", &actual)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		equal(t, expect, actual)
+	})
+
+	t.Run("with mix and ignore", func(t *testing.T) {
+
+		type QueryParams struct {
+			Text       string `query:"text"`
+			ID         string `query:"-"`
+			Number     int64
+			Vat        float64 `query:"-"`
+			MiddleName *string
+		}
+
+		var actual QueryParams
+
+		expect := QueryParams{
+			Text:       "TEXT",
+			ID:         "",
+			Number:     888,
+			Vat:        0,
+			MiddleName: nil,
+		}
+
+		err := query.Unmarshal("text=TEXT&number=888", &actual)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		equal(t, expect, actual)
+	})
+
 }
 
 func BenchmarkUnmarshal(b *testing.B) {
