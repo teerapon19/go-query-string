@@ -105,7 +105,7 @@ func (d *decode) mapValueToObj(data map[string]string, v reflect.Value) {
 
 func (d *decode) valueToString(fieldName, data string, v reflect.Value) {
 	switch v.Kind() {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if v.IsZero() || v.IsNil() {
 			v.Set(reflect.New(v.Type().Elem()))
 		}
