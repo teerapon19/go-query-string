@@ -50,16 +50,18 @@ func (d *decode) do() (err error) {
 	return
 }
 
-func (d *decode) splitSeperate() (m map[string]string) {
-	m = map[string]string{}
-	for _, v := range strings.Split(d.data, seperator) {
-		sepData := strings.SplitN(v, equal, 2)
+func (d *decode) splitSeperate() map[string]string {
+	m := make(map[string]string)
+	queryParts := strings.Split(d.data, seperator)
+	for _, query := range queryParts {
+		sepData := strings.SplitN(query, equal, 2)
 		if len(sepData) < 2 {
-			d.error(fmt.Errorf("%v is invalid query", sepData))
+			d.error(fmt.Errorf("%v is an invalid query", sepData))
+		} else {
+			m[sepData[0]] = sepData[1]
 		}
-		m[sepData[0]] = sepData[1]
 	}
-	return
+	return m
 }
 
 func (d *decode) getName(sf reflect.StructField) string {
@@ -74,34 +76,32 @@ func (d *decode) getName(sf reflect.StructField) string {
 
 func (d *decode) mapValueToObj(data map[string]string, v reflect.Value) {
 	elem := v.Elem()
-	for i := 0; i < elem.NumField(); i++ {
-		fv := elem.Field(i)
-		ft := elem.Type().Field(i)
+	elemType := elem.Type()
 
-		if !fv.CanSet() {
-			d.error(fmt.Errorf("%v is unexported field", ft.Name))
+	for i := 0; i < elem.NumField(); i++ {
+		fieldValue := elem.Field(i)
+		fieldType := elemType.Field(i)
+
+		if !fieldValue.CanSet() {
+			d.error(fmt.Errorf("%v is unexported field", fieldType.Name))
 		}
 
-		fieldName := d.getName(ft)
-		if data, ok := data[fieldName]; ok {
-			d.valueToString(fieldName, data, fv)
+		fieldName := d.getName(fieldType)
+		if fieldValue.CanAddr() {
+			if dataValue, ok := data[fieldName]; ok {
+				d.valueToString(fieldName, dataValue, fieldValue)
+			}
 		}
 	}
-
 }
 
 func (d *decode) valueToString(fieldName, data string, v reflect.Value) {
-
-	// reflect pointer
-	if v.Kind() == reflect.Pointer {
+	switch v.Kind() {
+	case reflect.Ptr:
 		if v.IsZero() || v.IsNil() {
 			v.Set(reflect.New(v.Type().Elem()))
 		}
 		d.valueToString(fieldName, data, v.Elem())
-		return
-	}
-
-	switch v.Kind() {
 	case reflect.String:
 		v.SetString(data)
 	case reflect.Bool:
@@ -111,13 +111,13 @@ func (d *decode) valueToString(fieldName, data string, v reflect.Value) {
 		}
 		v.SetBool(value)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		value, err := strconv.ParseInt(data, 10, 64)
+		value, err := strconv.ParseInt(data, 10, v.Type().Bits())
 		if err != nil {
 			d.error(fmt.Errorf("err: %v, %v=%v", err, fieldName, data))
 		}
 		v.SetInt(value)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		value, err := strconv.ParseUint(data, 10, 64)
+		value, err := strconv.ParseUint(data, 10, v.Type().Bits())
 		if err != nil {
 			d.error(fmt.Errorf("err: %v, %v=%v", err, fieldName, data))
 		}

@@ -47,9 +47,10 @@ func (e *encode) do() (query string, err error) {
 		}
 	}()
 
-	for i := 0; i < e.obj.NumField(); i++ {
+	numFields := e.obj.NumField()
+	for i := 0; i < numFields; i++ {
 		e.pair(e.obj.Type().Field(i), e.obj.Field(i))
-		if i != e.obj.NumField()-1 {
+		if i != numFields-1 {
 			e.qb.WriteString(seperator)
 		}
 	}
@@ -59,12 +60,11 @@ func (e *encode) do() (query string, err error) {
 }
 
 func (e *encode) pair(fs reflect.StructField, v reflect.Value) {
-	bb := bytes.Buffer{}
 	key := e.key(fs)
-	bb.WriteString(key)
-	bb.WriteString(equal)
-	bb.WriteString(e.valueToString(v))
-	e.qb.Write(bb.Bytes())
+	value := e.valueToString(v)
+	e.qb.WriteString(key)
+	e.qb.WriteString(equal)
+	e.qb.WriteString(value)
 }
 
 func (e *encode) key(v reflect.StructField) string {
@@ -79,13 +79,9 @@ func (e *encode) key(v reflect.StructField) string {
 
 func (e *encode) valueToString(v reflect.Value) (s string) {
 
-	// reflect pointer
-	if v.Kind() == reflect.Pointer {
-		s = e.valueToString(v.Elem())
-		return
-	}
-
 	switch v.Kind() {
+	case reflect.Pointer:
+		s = e.valueToString(v.Elem())
 	case reflect.String:
 		s = v.String()
 	case reflect.Bool:
