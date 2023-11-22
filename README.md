@@ -1,6 +1,6 @@
 # go-query-string
 
-![Project status](https://img.shields.io/badge/version-0.0.1-green.svg)
+![Project status](https://img.shields.io/badge/version-1.0.1-green.svg)
 ![License](https://img.shields.io/dub/l/vibe-d.svg)
 
 `go-query-string` allows for easy encodes and decodes structs to query param
@@ -70,6 +70,12 @@ func main() {
         log.Fatal(err)
     }
 
-    // queryParams => {id:1234567890}
+    // queryParams => {ID:1234567890}
 }
 ```
+
+## Struct Tag
+
+- `query:"-"` to ignore encode and decode
+- `query:"name:type"` to use field name to be key if leave it's empty the name will use field name change to snake case by default
+- `query:"<name>"` to change name of key query
