@@ -229,3 +229,22 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 }
+
+func BenchmarkUnmarshal(b *testing.B) {
+	type QueryParams struct {
+		Text       string `query:"text"`
+		ID         string
+		Number     int64
+		Vat        float64
+		MiddleName *string
+	}
+
+	b.ReportAllocs()
+	b.StartTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			var actual QueryParams
+			query.Unmarshal("text=TEXT&id=1234567&number=0&vat=1.1", &actual)
+		}
+	})
+}

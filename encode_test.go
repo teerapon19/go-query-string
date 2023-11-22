@@ -184,3 +184,25 @@ func TestMarshal(t *testing.T) {
 	})
 
 }
+
+func BenchmarkMarshal(b *testing.B) {
+	type QueryParams struct {
+		text   string `query:"text"`
+		ID     string
+		Number int64
+		vat    float64
+	}
+
+	b.ReportAllocs()
+	b.StartTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			query.Marshal(QueryParams{
+				text:   "TEXT",
+				ID:     "1234567",
+				Number: 0,
+				vat:    1.1,
+			})
+		}
+	})
+}
