@@ -1,8 +1,10 @@
 package query
 
 import (
+	"reflect"
 	"regexp"
 	"strings"
+	"testing"
 )
 
 const (
@@ -19,4 +21,10 @@ func ConvertToSnakeCase(name string) string {
 	snake := matchFirstCap.ReplaceAllString(name, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return strings.ToLower(snake)
+}
+
+func Equal(t *testing.T, expect interface{}, actual interface{}) {
+	if !reflect.DeepEqual(expect, actual) {
+		t.Fatalf("expect: %v, actual: %v", expect, actual)
+	}
 }
