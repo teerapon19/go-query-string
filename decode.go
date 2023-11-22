@@ -42,7 +42,7 @@ func (d *decode) do() (err error) {
 	}()
 
 	if reflect.ValueOf(d.obj).Kind() != reflect.Pointer {
-		d.error(fmt.Errorf("it's not a pointer"))
+		d.error(fmt.Errorf("%v is non-pointer", reflect.TypeOf(d.obj)))
 	}
 
 	data := d.splitSeperate()
@@ -75,9 +75,16 @@ func (d *decode) getName(sf reflect.StructField) string {
 func (d *decode) mapValueToObj(data map[string]string, v reflect.Value) {
 	elem := v.Elem()
 	for i := 0; i < elem.NumField(); i++ {
-		fieldName := d.getName(elem.Type().Field(i))
+		fv := elem.Field(i)
+		ft := elem.Type().Field(i)
+
+		if !fv.CanSet() {
+			d.error(fmt.Errorf("%v is unexported field", ft.Name))
+		}
+
+		fieldName := d.getName(ft)
 		if data, ok := data[fieldName]; ok {
-			d.valueToString(fieldName, data, elem.Field(i))
+			d.valueToString(fieldName, data, fv)
 		}
 	}
 
@@ -87,6 +94,9 @@ func (d *decode) valueToString(fieldName, data string, v reflect.Value) {
 
 	// reflect pointer
 	if v.Kind() == reflect.Pointer {
+		if v.IsZero() || v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
+		}
 		d.valueToString(fieldName, data, v.Elem())
 		return
 	}
